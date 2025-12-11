@@ -1,31 +1,28 @@
 name: Activate Domain
-
 on:
   repository_dispatch:
     types: [activate-domain]
 
 jobs:
-  activate:
+  run:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
 
-    - name: Activate
+    - name: Activate domain
       run: |
-        DOMAIN="${{ github.event.client_payload.domain }}"
-        FILE="domains/list.json"
+        echo "DOMAIN=${{ github.event.client_payload.domain }}" >> $GITHUB_ENV
 
-        node <<EOF
+        node <<'EOF'
         const fs = require("fs");
-        const f = "domains/list.json";
-        const d = JSON.parse(fs.readFileSync(f));
+        const file = "domains/list.json";
+        const d = JSON.parse(fs.readFileSync(file));
         const domain = process.env.DOMAIN;
 
         d.pending = d.pending.filter(x => x !== domain);
         if (!d.active.includes(domain)) d.active.push(domain);
 
-        fs.writeFileSync(f, JSON.stringify(d, null, 2));
+        fs.writeFileSync(file, JSON.stringify(d,null,2));
         EOF
 
     - name: Commit
@@ -33,5 +30,5 @@ jobs:
         git config user.name "Auto Bot"
         git config user.email "bot@github.com"
         git add .
-        git commit -m "Activate domain"
+        git commit -m "Activated domain" || echo "No changes"
         git push
