@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard | Dhanjee License</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Poppins;padding:30px;background:#f5f5f5;}
+table{width:100%;border-collapse:collapse;}
+td,th{padding:10px;border-bottom:1px solid #ddd;}
+th{background:#0066ff;color:white;}
+button{padding:6px 12px;border:none;border-radius:6px;color:white;}
+.act{background:#28a745;}
+.del{background:#dc3545;}
+.pending{background:#fff6b3;}
+.active{background:#d4ffda;}
+</style>
+</head>
+<body>
+
+<h2>Admin Panel - Dhanjee License</h2>
+<table id="tbl"></table>
+
+<script>
+async function load(){
+  let res = await fetch("https://raw.githubusercontent.com/dhanjeerider/license-system/main/domains/list.json");
+  let data = await res.json();
+
+  let html = "<tr><th>Domain</th><th>Status</th><th>Actions</th></tr>";
+
+  data.pending.forEach(d=>{
+    html += `<tr class="pending">
+      <td>${d}</td><td>Pending</td>
+      <td>
+        <button class="act" onclick="activate('${d}')">Activate</button>
+        <button class="del" onclick="del('${d}')">Delete</button>
+      </td></tr>`;
+  });
+
+  data.active.forEach(d=>{
+    html += `<tr class="active">
+      <td>${d}</td><td>Active</td>
+      <td><button class="del" onclick="del('${d}')">Delete</button></td></tr>`;
+  });
+
+  document.getElementById("tbl").innerHTML = html;
+}
+
+async function call(event_type, domain){
+  await fetch("https://api.github.com/repos/dhanjeerider/license-system/dispatches",{
+    method:"POST",
+    headers:{
+      "Accept":"application/vnd.github+json",
+      "Authorization":"token YOUR_GITHUB_PAT"
+    },
+    body:JSON.stringify({
+      event_type, client_payload:{ domain }
+    })
+  });
+}
+
+async function activate(domain){ await call("activate-domain", domain); load(); }
+async function del(domain){ await call("delete-domain", domain); load(); }
+
+load();
+</script>
+
+</body>
+</html>
