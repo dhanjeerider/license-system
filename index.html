@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Submit Domain | Dhanjee License System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Poppins;background:#f7f7f7;padding:40px;}
+.box{background:white;padding:30px;border-radius:12px;max-width:450px;margin:auto;box-shadow:0 0 10px #ccc;}
+input,button{width:100%;padding:14px;margin:10px 0;border-radius:8px;border:1px solid #ddd;font-size:15px;}
+button{background:#0066ff;color:white;border:none;cursor:pointer;}
+h2{text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Submit Your Domain</h2>
+<input id="domain" placeholder="example.com">
+<button onclick="submitDomain()">Submit</button>
+<p id="msg"></p>
+</div>
+
+<script>
+async function submitDomain(){
+  let domain = document.getElementById("domain").value.trim();
+  if(!domain) return alert("Please enter a domain.");
+
+  await fetch("https://api.github.com/repos/dhanjeerider/license-system/dispatches",{
+    method:"POST",
+    headers:{
+      "Accept":"application/vnd.github+json",
+      "Authorization":"token YOUR_GITHUB_PAT"
+    },
+    body:JSON.stringify({
+      event_type:"add-domain",
+      client_payload:{ domain }
+    })
+  });
+
+  document.getElementById("msg").innerHTML = "✅ Submitted for approval!";
+}
+</script>
+
+</body>
+</html>
